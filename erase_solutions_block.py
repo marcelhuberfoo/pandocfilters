@@ -1,7 +1,4 @@
 #!/usr/bin/env python
-from pandocfilters import toJSONFilter
-import re
-
 """
 Pandoc filter that causes everything between
 '<!-- BEGIN SOLUTION -->' and '<!-- END SOLUTION -->'
@@ -9,6 +6,9 @@ to be ignored.  The comment lines must appear on
 lines by themselves, with blank lines surrounding
 them.
 """
+
+from pandocfilters import toJSONFilter
+import re
 
 incomment = False
 
@@ -26,6 +26,7 @@ def comment(k, v, fmt, meta):
                 return []
     if incomment:
         return []  # suppress anything in a comment
+
 
 if __name__ == "__main__":
     toJSONFilter(comment)

@@ -1,17 +1,17 @@
 #!/usr/bin/env python
 """
-Pandoc filter to process code blocks with class "graphviz" into
-graphviz-generated images.
+Pandoc filter to process code blocks with class "plantuml" into
+plant-generated images.
 """
 
 import hashlib
 import os
 import sys
 from pandocfilters import toJSONFilter, Str, Para, Image
-from pygraphviz import AGraph as graph
+from subprocess import call
 
 imagedir = "img"
-classtriggers = ['graphviz', 'dot']
+classtriggers = ['plantuml']
 
 
 def sha1(x):
@@ -55,10 +55,12 @@ def ensure_writable_outputdir(imagedir):
 
 
 def prepare_code(code):
+    if not code.startswith("@start"):
+        code = "@startuml\n" + code + "\n@enduml\n"
     return code
 
 
-def graphviz(key, value, format, meta):
+def plantuml(key, value, format, meta):
     if key == 'CodeBlock':
         try:
             [[ident, classes, keyvals], code] = value
@@ -67,8 +69,7 @@ def graphviz(key, value, format, meta):
         if set(classtriggers).intersection(set(classes)):
             kwargs = filter_keyvalues(keyvals)
             txt = prepare_code(code)
-            G = graph(string=txt, name=kwargs['name'])
-            filename = sha1(txt)
+            filename = sha1(code)
             if format == "html":
                 filetype = "svg"
             elif format in ['latex', 'beamer']:
@@ -78,7 +79,11 @@ def graphviz(key, value, format, meta):
             if ensure_writable_outputdir(imagedir):
                 dest = os.path.join(imagedir, '.'.join([filename, filetype]))
                 if not os.path.isfile(dest):
-                    G.draw(dest, prog=kwargs['prog'])
+                    src = os.path.join(imagedir, filename + '.uml')
+                    with open(src, "w") as f:
+                        f.write(txt)
+                    call(["plantuml", "-t" + filetype, src])
+                    os.unlink(src)
                     sys.stderr.write('Created image ' + dest + '\n')
                 _classes = list(set(classes).difference(set(classtriggers)))
                 return Para([Image([ident, _classes, kwargs['kvlist']],
@@ -87,4 +92,4 @@ def graphviz(key, value, format, meta):
 
 
 if __name__ == "__main__":
-    toJSONFilter(graphviz)
+    toJSONFilter(plantuml)
