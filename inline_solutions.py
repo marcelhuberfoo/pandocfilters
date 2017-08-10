@@ -9,7 +9,7 @@ from subprocess import call, PIPE, Popen
 import re
 import json
 
-SOL_RE = re.compile(r'^<!--\sSOLUTION\s+(?P<contents>.*)\s*(SOLUTION\s)?-->$', re.MULTILINE |
+SOL_RE = re.compile(r'^<!--\sSOLUTION\s+(?P<contents>.*)\s*SOLUTION\s+-->$', re.MULTILINE |
                     re.UNICODE | re.DOTALL)
 LISTNUM_ESCAPE_RE = r'\?(?P<ltype>(-|\d+\.)\s+)'
 
