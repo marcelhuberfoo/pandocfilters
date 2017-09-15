@@ -25,10 +25,15 @@ def solution(key, value, format, meta):
                           stdin=PIPE,
                           stdout=PIPE)
                 output, _ = p.communicate(solution_contents)
-                out_json = json.loads(output.decode('utf8'))[1]
+                try:
+                    # pandoc < 1.18 and/or pandocfilters <1.14
+                    out_json = json.loads(output.decode('utf8'))[1]
+                except KeyError:
+                    out_json = json.loads(output.decode('utf8')).get('blocks')
                 if key == 'RawBlock':
                     return out_json
                 return out_json[0].get('c')
+    return None
 
 
 if __name__ == "__main__":
