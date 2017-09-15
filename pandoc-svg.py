@@ -72,7 +72,10 @@ def svg_to_any(key, value, fmt, meta):
             [_id, _classes, _keyvallists], [alt], [src, title] = value
         except:
             return None
-        mimet, _ = mimetypes.guess_type(src)
+        try:
+            mimet, _ = mimetypes.guess_type(src)
+        except:
+            mimet = None
         option = fmt_to_option.get(fmt)
         if mimet == 'image/svg+xml' and option:
             if os.path.isfile(src):
